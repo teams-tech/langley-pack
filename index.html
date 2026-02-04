@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PACK Pricing Calculator</title>
+  <link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --white: #ffffff;
+      --bg: #f8f9fb;
+      --surface: #ffffff;
+      --border: #e5e9f0;
+      --border-dark: #d1d9e6;
+
+      --navy-900: #0f1c2e;
+      --navy-800: #1a2d47;
+      --navy-700: #243b5c;
+      --navy-600: #2e4a6f;
+      --navy: #365580;
+
+      --gold: #c9a227;
+      --gold-light: #d4b44a;
+      --gold-dim: rgba(201, 162, 39, 0.12);
+
+      --text-primary: #1a2d47;
+      --text-secondary: #5a6a7e;
+      --text-tertiary: #8b97a8;
+
+      --success: #2e7d5a;
+      --success-bg: #e8f5ef;
+      --warning: #b8860b;
+      --warning-bg: #fef9e7;
+      --danger: #c0392b;
+      --danger-bg: #fdecea;
+
+      --blue: #2874a6;
+      --blue-bg: #e8f4fd;
+      --green: #2e7d5a;
+      --green-bg: #e8f5ef;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'D-DIN', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .dashboard {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--navy-800);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .brand-tag::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    .close-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .close-btn:hover {
+      border-color: var(--border-dark);
+      color: var(--text-primary);
+    }
+
+    .close-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Header with profit potential */
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .vehicle-info h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .vehicle-meta {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .profit-potential {
+      text-align: right;
+    }
+
+    .profit-potential .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+
+    .profit-potential .value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--success);
+      letter-spacing: -1px;
+    }
+
+    .profit-potential .note {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+
+    .vehicle-ids {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .id-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+
+    .id-field .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-tertiary);
+      font-weight: 600;
+    }
+
+    .id-field .value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .id-field .copy-btn {
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .id-field .copy-btn:hover {
+      background: var(--border);
+      color: var(--text-primary);
+    }
+
+    .id-field .copy-btn.copied {
+      color: var(--success);
+    }
+
+    .id-field .copy-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Main card */
+    .main-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    /* Hero section */
+    .hero {
+      padding: 32px 40px;
+      background: var(--navy-800);
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+    }
+
+    .hero-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hero-left {
+      flex: 1;
+    }
+
+    .hero-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 8px;
+    }
+
+    .hero-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .hero-price .currency {
+      font-size: 28px;
+      color: rgba(255,255,255,0.7);
+      vertical-align: top;
+      margin-right: 2px;
+    }
+
+    .hero-note {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 8px;
+    }
+
+    .hero-right {
+      text-align: right;
+      padding-left: 40px;
+      border-left: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .min-price-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--gold-light);
+      margin-bottom: 8px;
+    }
+
+    .min-price-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -1px;
+    }
+
+    .min-price-note {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+    }
+
+    /* Cost breakdown row */
+    .cost-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .cost-item {
+      padding: 20px 24px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .cost-item:last-child {
+      border-right: none;
+    }
+
+    .cost-item .label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-tertiary);
+      margin-bottom: 6px;
+    }
+
+    .cost-item .value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .cost-item .value.gold {
+      color: var(--gold);
+    }
+
+    .cost-item .note {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    /* Section header */
+    .section-header {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-tertiary);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .section-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: var(--gold);
+    }
+
+    /* Tier cards */
+    .tiers-section {
+      padding: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tiers-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .tier-card {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 24px 20px;
+      text-align: center;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tier-card:hover {
+      border-color: var(--border-dark);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .tier-card.cash {
+      border-color: var(--navy-800);
+    }
+
+    .tier-card.enhanced {
+      border-color: var(--blue);
+    }
+
+    .tier-card.premium {
+      border-color: var(--green);
+    }
+
+    .tier-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .tier-card.cash .tier-badge {
+      background: var(--navy-800);
+      color: white;
+    }
+
+    .tier-card.enhanced .tier-badge {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+
+    .tier-card.premium .tier-badge {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .tier-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .tier-desc {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 20px;
+      min-height: 32px;
+    }
+
+    .tier-profit {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .tier-card.cash .tier-profit {
+      background: rgba(26, 45, 71, 0.1);
+      color: var(--navy-800);
+    }
+
+    .tier-card.enhanced .tier-profit {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+
+    .tier-card.premium .tier-profit {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    /* Products table */
+    .products-section {
+      padding: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .products-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .products-table thead {
+      background: var(--navy-800);
+    }
+
+    .products-table th {
+      text-align: left;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.7);
+      padding: 12px 16px;
+    }
+
+    .products-table th:first-child {
+      border-radius: 6px 0 0 6px;
+    }
+
+    .products-table th:last-child {
+      text-align: right;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .products-table td {
+      padding: 14px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .products-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .products-table tbody tr:hover {
+      background: var(--bg);
+    }
+
+    .products-table .tier-row {
+      background: var(--bg);
+    }
+
+    .products-table .tier-row td {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 10px 16px;
+    }
+
+    .products-table .tier-row.enhanced td {
+      color: var(--blue);
+    }
+
+    .products-table .tier-row.premium td {
+      color: var(--green);
+    }
+
+    .products-table .product-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .products-table .amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .products-table .profit {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--success);
+      text-align: right;
+    }
+
+    .products-table .total-row td {
+      font-weight: 700;
+      border-top: 2px solid var(--border);
+    }
+
+    /* Footer */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 28px;
+      background: var(--bg);
+    }
+
+    .footer-timestamp {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--navy-800);
+    }
+
+    .brand::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--gold);
+      border-radius: 2px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard { padding: 16px; }
+      .header-top { flex-direction: column; gap: 16px; }
+      .profit-potential { text-align: left; }
+      .vehicle-info h1 { font-size: 22px; }
+      .vehicle-ids { flex-wrap: wrap; }
+      .id-field { flex: 1; min-width: 140px; }
+      .hero-content { flex-direction: column; gap: 24px; }
+      .hero-right { text-align: left; padding-left: 0; border-left: none; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+      .hero-price { font-size: 36px; }
+      .cost-row { grid-template-columns: repeat(2, 1fr); }
+      .cost-item { border-bottom: 1px solid var(--border); }
+      .tiers-grid { grid-template-columns: 1fr; }
+      .footer { flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard" id="app"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    const data = {
+      year_make_model: params.get('year_make_model') || 'Unknown Vehicle',
+      stock_number: params.get('stock_number'),
+      vin: params.get('vin'),
+      mileage: params.get('mileage'),
+      cost_basis: parseFloat(params.get('cost_basis')) || 0,
+      pack_amount: parseFloat(params.get('pack_amount')) || 0,
+      internet_price: parseFloat(params.get('internet_price')) || 0,
+      cargurus_imv: parseFloat(params.get('cargurus_imv')) || 0
+    };
+
+    // PACK Model Configuration
+    const PACK_CONFIG = {
+      pack_floor: 2500,
+      pack_scale_pct: 0.10,
+      fees: { total: 125 },
+      enhanced: {
+        label: "Enhanced",
+        description: "VSC 36/36 + GAP",
+        products: [
+          { name: "Select VSC 36/36 ($100 ded)", cost: 1100, retail: 1800 },
+          { name: "GAP Insurance", cost: 325, retail: 650 }
+        ]
+      },
+      premium: {
+        label: "Premium",
+        description: "VSC 48/48 + GAP + Maintenance",
+        products: [
+          { name: "Premium VSC 48/48 ($100 ded)", cost: 1600, retail: 2600 },
+          { name: "GAP Insurance", cost: 325, retail: 795 },
+          { name: "Maintenance Plan 36mo", cost: 600, retail: 1100 }
+        ]
+      }
+    };
+
+    const fmt = (v) => {
+      if (!v && v !== 0) return '0';
+      return Number(v).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    };
+
+    const fmtShort = (v) => {
+      if (!v && v !== 0) return '$0';
+      return '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    };
+
+    function calculateTierTotals(tier) {
+      const totalCost = tier.products.reduce((sum, p) => sum + p.cost, 0);
+      const totalRetail = tier.products.reduce((sum, p) => sum + p.retail, 0);
+      return { totalCost, totalRetail, totalProfit: totalRetail - totalCost };
+    }
+
+    function render() {
+      const costBasis = data.cost_basis;
+      const variablePack = data.pack_amount || Math.max(PACK_CONFIG.pack_floor, costBasis * PACK_CONFIG.pack_scale_pct);
+      const floorPack = PACK_CONFIG.pack_floor;
+      const fees = PACK_CONFIG.fees.total;
+
+      // Cash price uses variable pack
+      const cashPrice = costBasis + variablePack + fees;
+
+      // Minimum selling price uses floor pack ($2,500)
+      const minSellingPrice = costBasis + floorPack + fees;
+
+      const enhancedTotals = calculateTierTotals(PACK_CONFIG.enhanced);
+      const premiumTotals = calculateTierTotals(PACK_CONFIG.premium);
+
+      const enhancedPrice = cashPrice + enhancedTotals.totalRetail;
+      const premiumPrice = cashPrice + premiumTotals.totalRetail;
+
+      // Profits per tier
+      const cashProfit = variablePack;
+      const enhancedProfit = variablePack + enhancedTotals.totalProfit;
+      const premiumProfit = variablePack + premiumTotals.totalProfit;
+
+      document.getElementById('app').innerHTML = `
+        <div class="top-bar">
+          <div class="brand-tag">PACK Pricing Calculator</div>
+          <button class="close-btn" title="Close">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="header">
+          <div class="header-top">
+            <div class="vehicle-info">
+              <h1>${data.year_make_model}</h1>
+              <div class="vehicle-meta">${data.mileage ? Number(data.mileage).toLocaleString() + ' miles' : ''}${data.cargurus_imv > 0 ? ' • CarGurus IMV: ' + fmtShort(data.cargurus_imv) : ''}</div>
+            </div>
+            <div class="profit-potential">
+              <div class="label">Profit Potential</div>
+              <div class="value">+${fmtShort(premiumProfit)}</div>
+              <div class="note">Premium tier, full F&I</div>
+            </div>
+          </div>
+          <div class="vehicle-ids">
+            <div class="id-field">
+              <span class="label">Stock</span>
+              <span class="value" id="stock-value">${data.stock_number || '—'}</span>
+              <button class="copy-btn" onclick="copyToClipboard('stock-value', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="id-field">
+              <span class="label">VIN</span>
+              <span class="value" id="vin-value">${data.vin || '—'}</span>
+              <button class="copy-btn" onclick="copyToClipboard('vin-value', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-card">
+          <div class="hero">
+            <div class="hero-content">
+              <div class="hero-left">
+                <div class="hero-label">Cash Price</div>
+                <div class="hero-price"><span class="currency">$</span>${fmt(cashPrice)}</div>
+                <div class="hero-note">Cost + Variable Pack + Fees</div>
+              </div>
+              <div class="hero-right">
+                <div class="min-price-label">Min Selling Price</div>
+                <div class="min-price-value">${fmtShort(minSellingPrice)}</div>
+                <div class="min-price-note">Cost + $2,500 floor + Fees</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cost-row">
+            <div class="cost-item">
+              <div class="label">Cost Basis</div>
+              <div class="value">${fmtShort(costBasis)}</div>
+            </div>
+            <div class="cost-item">
+              <div class="label">Variable Pack</div>
+              <div class="value gold">${fmtShort(variablePack)}</div>
+              <div class="note">10% of cost</div>
+            </div>
+            <div class="cost-item">
+              <div class="label">Floor Pack</div>
+              <div class="value">${fmtShort(floorPack)}</div>
+              <div class="note">Cash minimum</div>
+            </div>
+            <div class="cost-item">
+              <div class="label">Fees</div>
+              <div class="value">${fmtShort(fees)}</div>
+            </div>
+          </div>
+
+          <div class="tiers-section">
+            <div class="section-header">Pricing Tiers</div>
+            <div class="tiers-grid">
+              <div class="tier-card cash">
+                <span class="tier-badge">Cash</span>
+                <div class="tier-price">${fmtShort(cashPrice)}</div>
+                <div class="tier-desc">Base price, no F&I products</div>
+                <div class="tier-profit">+${fmtShort(cashProfit)}</div>
+              </div>
+              <div class="tier-card enhanced">
+                <span class="tier-badge">Enhanced</span>
+                <div class="tier-price">${fmtShort(enhancedPrice)}</div>
+                <div class="tier-desc">${PACK_CONFIG.enhanced.description}</div>
+                <div class="tier-profit">+${fmtShort(enhancedProfit)}</div>
+              </div>
+              <div class="tier-card premium">
+                <span class="tier-badge">Premium</span>
+                <div class="tier-price">${fmtShort(premiumPrice)}</div>
+                <div class="tier-desc">${PACK_CONFIG.premium.description}</div>
+                <div class="tier-profit">+${fmtShort(premiumProfit)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="products-section">
+            <div class="section-header">F&I Product Breakdown</div>
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Our Cost</th>
+                  <th>Retail</th>
+                  <th>Profit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="tier-row enhanced">
+                  <td colspan="4">Enhanced Package</td>
+                </tr>
+                ${PACK_CONFIG.enhanced.products.map(p => `
+                  <tr>
+                    <td class="product-name">${p.name}</td>
+                    <td class="amount">${fmtShort(p.cost)}</td>
+                    <td class="amount">${fmtShort(p.retail)}</td>
+                    <td class="profit">+${fmtShort(p.retail - p.cost)}</td>
+                  </tr>
+                `).join('')}
+                <tr class="total-row">
+                  <td class="product-name">Enhanced Total</td>
+                  <td class="amount">${fmtShort(enhancedTotals.totalCost)}</td>
+                  <td class="amount">${fmtShort(enhancedTotals.totalRetail)}</td>
+                  <td class="profit">+${fmtShort(enhancedTotals.totalProfit)}</td>
+                </tr>
+                <tr class="tier-row premium">
+                  <td colspan="4">Premium Package</td>
+                </tr>
+                ${PACK_CONFIG.premium.products.map(p => `
+                  <tr>
+                    <td class="product-name">${p.name}</td>
+                    <td class="amount">${fmtShort(p.cost)}</td>
+                    <td class="amount">${fmtShort(p.retail)}</td>
+                    <td class="profit">+${fmtShort(p.retail - p.cost)}</td>
+                  </tr>
+                `).join('')}
+                <tr class="total-row">
+                  <td class="product-name">Premium Total</td>
+                  <td class="amount">${fmtShort(premiumTotals.totalCost)}</td>
+                  <td class="amount">${fmtShort(premiumTotals.totalRetail)}</td>
+                  <td class="profit">+${fmtShort(premiumTotals.totalProfit)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="footer">
+            <div class="footer-timestamp">Last updated: ${new Date().toLocaleString()}</div>
+            <span class="brand">Auto Solution</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function copyToClipboard(elementId, button) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        button.classList.add('copied');
+        button.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+        setTimeout(() => {
+          button.classList.remove('copied');
+          button.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>`;
+        }, 1500);
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
